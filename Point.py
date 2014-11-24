@@ -1,5 +1,5 @@
 class PointClass:
-    def __init__(self, d1, d2, label):
+    def __init__(self, d1, d2, label=0):
         self.dims = [d1, d2]
         self.label = label
 

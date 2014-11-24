@@ -11,5 +11,9 @@ def importSet(path):
 
         for line in data:
             words = line.split()
-            s.add(PointClass(float(words[0]), float(words[1]), int(words[2])))
+            if (len(words) > 2):
+                label = int(words[2])
+            else:
+                label = 0
+            s.add(PointClass(float(words[0]), float(words[1]), label))
     return s
