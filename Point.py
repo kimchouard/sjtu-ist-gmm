@@ -1,16 +1,16 @@
 class PointClass:
-    def __init__(self, d1, d2, label=0):
-        self.dims = [d1, d2]
+    def __init__(self, dims, label=0):
+        self.dims = dims
         self.label = label
 
-    def getX(self):
-        return self.dims[0]
-
-    def getY(self):
-        return self.dims[1]
+    def getDim(self, i):
+        return self.dims[i]
 
     def getLabel(self):
         return self.label
+
+    def getDimNum(self):
+        return len(self.dims)
 
     def getColor(self):
         if self.label == 1:

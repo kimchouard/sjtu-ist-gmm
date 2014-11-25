@@ -4,6 +4,9 @@ class SetClass:
     def add(self, point):
         self.points.append(point)
 
+    def getPoint(self, n):
+        return self.points[n]
+
     def getPlotData(self):
         X = []
         Y = []
@@ -11,8 +14,8 @@ class SetClass:
         C = []
 
         for point in self.points:
-            X.append(point.getX())
-            Y.append(point.getY())
+            X.append(point.getDim(0))
+            Y.append(point.getDim(1))
             C.append(point.getColor())
 
         return [X, Y, pointSize, C]
