@@ -6,6 +6,9 @@ class PointClass:
     def getDim(self, i):
         return self.dims[i]
 
+    def getDims(self, i):
+        return self.dims
+
     def getLabel(self):
         return self.label
 
