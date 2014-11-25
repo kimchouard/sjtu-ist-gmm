@@ -1,5 +1,12 @@
 class PointClass:
     def __init__(self, dims, label=0):
+        """
+        Initialize a point from parameters:
+            - dims: array containing point values
+            !! IMPORTANT respect the form [[x1], [x2], ...]
+            - label (falcultative): define to which class label
+            the point belongs to
+        """
         self.dims = dims
         self.label = label
 

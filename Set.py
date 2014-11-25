@@ -7,6 +7,9 @@ class SetClass:
     def getPoint(self, n):
         return self.points[n]
 
+    def getLength(self):
+        return len(self.points)
+
     def getPlotData(self):
         X = []
         Y = []

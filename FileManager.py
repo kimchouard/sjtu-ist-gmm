@@ -18,5 +18,6 @@ def importSet(path, label=0):
 
             # Narrow to a specific label, if needed
             if (label == 0) or (dataLabel == label):
-                s.add(PointClass([float(words[0]), float(words[1])], dataLabel))
+                dims = [[float(words[0])], [float(words[1])]]
+                s.add(PointClass(dims, dataLabel))
     return s

@@ -34,7 +34,7 @@ def logN(xn, mean, cov):
         if det == 0:
             raise NameError("The covariance matrix can't be singular")
         # Pre-calc of x - mean
-        diff = xn - mean
+        diff = np.subtract(xn, mean)
         # Prec-cal of the first part of the sum
         part1 = d*np.log(2*math.pi)
         # Pre-calc of last part of the sum
@@ -73,12 +73,15 @@ def postProb(m, wGlob, xn, meanGlob, covGlob):
 # DEBUG
 # m = 0
 # w = [0.25, 0.25, 0.25, 0.25]
-# xn = np.matrix('0.6; 1.5')
+# xn = [[0.6], [1.5]]
 # mean = [[[-0.504032], [-0.0625]],
 #         [[0.780242], [1.46875]],
 #         [[1.5], [-0.015625]],
 #         [[2.54435], [0.9375]]]
-# cov = initCov(4, 2)
+# cov = []
+# for i in range(0, 4):
+#     cov.append(np.identity(2))
+# print m, w, xn, mean, cov
 # print postProb(m, w, xn, mean, cov)
 # mean = np.matrix('0; 0')
 # cov = np.matrix('1 0; 0 1')

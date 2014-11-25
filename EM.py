@@ -1,6 +1,7 @@
 import numpy as np
 # import math
 import FileManager
+import GMMToolbox as GMM
 from Set import SetClass
 
 
@@ -31,30 +32,106 @@ class EMalgo:
     # Run the EM algorithm for the value sets, with k components
     def run(self):
         # Initialize Teta values
-        self.initTeta()
-
+        self.initRun()
         self.describe()
-        #TODO: rest of the algorithm
+        self.iterate()
+        self.describe()
 
-    # Initialize Teta = (w, mean, cov) for the EM alg
-    def initTeta(self):
+    def iterate(self):
+        # Create new params
+        # postProb = []
+        postProbSum = 0
+        postProbSums = []
+        newMean = []
+        newCov = []
+        newWs = []
+
+        for m in range(0, self.k):
+            # Calculate each postProb along with its sum
+            postProbM = []
+            postProbSumM = 0
+            for n in range(0, self.s.getLength()):
+                xn = self.getXn(n)
+                w = self.ws[self.it]
+                mean = self.means[self.it]
+                cov = self.covs[self.it]
+                postProbMN = GMM.postProb(m, w, xn, mean, cov)
+                postProbM.append(postProbMN)
+                postProbSumM += postProbMN
+            # postProb.append(postProbM)
+            postProbSum += postProbSumM
+            postProbSums.append(postProbSumM)
+
+            # Calculate new mean
+            newMeanM = 0
+            n = 0
+            for n in range(0, self.s.getLength()):
+                newMeanM += np.dot(postProbM[n], self.getXn(n))
+                n = n + 1
+            newMeanM = newMeanM / postProbSumM
+            newMean.append(newMeanM)
+
+            # Calculate new cov
+            newCovM = 0
+            n = 0
+            for n in range(0, self.s.getLength()):
+                diff = np.subtract(self.getXn(n), newMeanM)
+                rightDot = np.dot(diff, np.transpose(diff))
+                newCovM += np.dot(postProbM[n], rightDot)
+            newCov.append(newCovM)
+            n = n + 1
+
+        #Update weights
+        for m in range(0, self.k):
+            newWs.append(postProbSums[m]/postProbSum)
+
+        # Add new params to history lists
+        self.postProbs.append(postProbSums)
+        self.means.append(newMean)
+        self.covs.append(newCov)
+        self.ws.append(newWs)
+
+        # Increment the iteration count
+        self.it += 1
+
+    # Get the dim of a point at n
+    def getXn(self, n):
+        return self.s.getPoint(n).getDims()
+
+    def initRun(self):
+        """
+        Initialize Tetas history and iteration counters for the EM alg
+        Where: ws = [w1,...], means = [mean1,...], covs = [cov1,...]
+        Comming from EM iterations
+        """
+        # Initialize iterations
+        self.it = 0
+        self.postProbs = []
+
         # Init weights
-        self.w = np.ones(4) / self.k
+        w = np.ones(self.k) / self.k
+        self.ws = [w]
 
         # Init mean (Harcoded for now)
         # TODO: found those automatically -> k-means
-        self.mean = [[[-0.504032], [-0.0625]],
-                    [[0.780242], [1.46875]],
-                    [[1.5], [-0.015625]],
-                    [[2.54435], [0.9375]]]
+        mean = [[[-0.504032], [-0.0625]],
+                [[0.780242], [1.46875]],
+                [[1.5], [-0.015625]],
+                [[2.54435], [0.9375]]]
+        self.means = [mean]
 
         # Init covariance matrix with Identities
-        self.cov = []
+        cov = []
         for i in range(0, self.k):
-            self.cov.append(np.identity(self.d))
+            cov.append(np.identity(self.d))
+        self.covs = [cov]
 
     def describe(self):
+        print "On iteration ", self.it
         print "Data set: ", self.s.describe(False)
-        print "K and D", self.k, "\n", self.d, "\n"
+        print "K and D:", self.k, ",", self.d
+        print "Post prob. matrix: ", self.postProbs
         print "Teta(w, mean, cov): "
-        print self.w, "\n", self.mean, "\n", self.cov, "\n"
+        print self.ws[self.it]
+        print self.means[self.it]
+        print self.covs[self.it]
