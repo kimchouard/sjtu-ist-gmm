@@ -1,13 +1,30 @@
 import numpy as np
 # import math
+import FileManager
+from Set import SetClass
 
 
 class EMalgo:
-    # Initialize with values set and # of comp. to search for, and init Teta
-    def __init__(self, s, k):
-        self.s = s
+    def __init__(self, source, k, label=0):
+        """
+        Initialize with values set and # of comp. to search for, and init Teta.
+        Params:
+            s: SetClass containing the xn values OR string to the data file
+            k: number of components to search for
+            label: narrow to a specific label in the set if needed
+        """
+
+        # Initiate the s data Set, either from file or direct parameter
+        if type(source) is str:
+            self.s = FileManager.importSet(source, label)
+        elif type(source) is SetClass:
+            self.s = source
+        else:
+            errorMsg = "The 1st param should be either a str or a SetClass"
+            raise TypeError(errorMsg)
+
         self.k = k
-        print self.s.getPoint(0)
+
         #Deduce the dimension from the input
         self.d = self.s.getPoint(0).getDimNum()
 

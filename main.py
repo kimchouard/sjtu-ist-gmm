@@ -1,15 +1,14 @@
 #import user class
 # from Point import PointClass
 # from Set import SetClass
-import FileManager
-import Plot
+# import Plot
 from EM import EMalgo
 
 
 def main():
-    s = FileManager.importSet("data/train.txt")
+    # s.describe(False)
     # Plot.plotSet(s)
-    em = EMalgo(s, 4)
+    em = EMalgo("data/train.txt", 4, 2)
     em.run()
 
 if __name__ == '__main__':
