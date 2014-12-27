@@ -10,7 +10,7 @@ class EMalgo:
         """
         Initialize with values set and # of comp. to search for, and init Teta.
         Params:
-            s: SetClass containing the xn values OR string to the data file
+            source: SetClass containing the xn values OR string to the data file
             k: number of components to search for
             label: narrow to a specific label in the set if needed
         """
