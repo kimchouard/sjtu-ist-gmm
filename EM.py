@@ -25,12 +25,12 @@ class EMalgo:
     (int) the number of iterations done
     - postProbs
     (list) containing all the posterior probability for each iteration.
-    - ws
-    (npArray K) containing the weights for each iteration.
-    - means
-    (npArray K*d) containing the mean for each iteration.
+    - w
+    (npArray K) containing the weights.
+    - mean
+    (npArray K*d) containing the means.
     - covs
-    (npArray K*d*d) containing the covs for each iteration.
+    (npArray K*d*d) containing the covs.
     - label:
     (str) label of the model, to narrow to a specific label in the set if needed
     """
@@ -59,9 +59,9 @@ class EMalgo:
         print "Data set: ", self.s.describe(False)
         print "K and D:", self.K, ",", self.d
         print "Teta(w, mean, cov): "
-        print self.ws[self.it]
-        print self.means[self.it]
-        print self.covs[self.it]
+        print self.w
+        print self.mean
+        print self.cov
 
     def initRun(self):
         """
@@ -73,20 +73,18 @@ class EMalgo:
         self.it = 0
 
         # Init weights
-        w = np.ones(self.K) / self.K
-        self.ws = [np.array(w)]
+        self.w = np.ones(self.K) / self.K
 
         # Init mean
-        self.means = [self.initMeans("hardcoded")]
+        self.mean = self.initMean("hardcoded")
 
 
         # Init covariance matrix with Identities
-        cov = []
+        self.cov = []
         for i in range(0, self.K):
-            cov.append(np.diag(np.ones(self.d)))
-        self.covs = [np.array(cov)]
+            self.cov.append(np.diag(np.ones(self.d)))
 
-    def initMeans(self, method):
+    def initMean(self, method):
         """
         Init the first means, following different methods.
 
@@ -137,24 +135,22 @@ class EMalgo:
         for i in range(maxIt):
             # TODO check dat
             self.EMiterate()
-            self.describe()
-
             # TODO break when diff under eps
+
             # Increment the iteration count
             self.it += 1
+
+            self.describe()
 
     def EMiterate(self):
         # Get params for current iteration
         data = self.s.getFeatures(self.label) #TODO check the matrix aspect
-        w = self.ws[self.it]
-        mean = self.means[self.it]
-        cov = self.covs[self.it]
 
         nbSamples, nbFeatures = data.shape
         log_pXn_mat = np.zeros((nbSamples, self.K))
         for i in range(self.K):
-            tmp = GMM.logN(data, mean[i], cov[i])
-            log_pXn_mat[:, i] = tmp + np.log(w[i])
+            tmp = GMM.logN(data, self.mean[i], self.cov[i])
+            log_pXn_mat[:, i] = tmp + np.log(self.w[i])
         pMax = np.max(log_pXn_mat, axis=1)
         log_pXn = pMax + np.log(np.sum(np.exp(log_pXn_mat.T - pMax), axis=0).T)
         logL = np.sum(log_pXn)
@@ -165,21 +161,10 @@ class EMalgo:
 
         pNk = np.e**log_pNk
 
-        # Create new params
-        newMean = np.zeros(4)
-        newCov = np.zeros(4)
-        newWs = np.zeros(4)
-
         for i in range(self.K):
-            newMean[i] = np.sum(pNk[:, i] * data.T, axis=1) / np.sum(pNk[:, i])
-            newCov[i] = np.dot(pNk[:, i] * (data - mean[i]).T, data - mean[i]) / np.sum(pNk[:, i])
-            newWs[i] = np.sum(pNk[:, i]) / nbSamples
-
-        # Add new params to history lists
-        self.means.append(newMean)
-        self.covs.append(newCov)
-        self.ws.append(newWs)
-        # return (means, cov, weights, logL)
+            self.mean[i] = np.sum(pNk[:, i] * data.T, axis=1) / np.sum(pNk[:, i])
+            self.cov[i] = np.dot(pNk[:, i] * (data - self.mean[i]).T, data - self.mean[i]) / np.sum(pNk[:, i])
+            self.w[i] = np.sum(pNk[:, i]) / nbSamples
 
     def wN(w, xn, mean, cov):
         """ Ponder N with its weight for the GMM """
