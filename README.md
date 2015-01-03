@@ -4,7 +4,21 @@ Project made by Kim Chouard in the context of Intelligent Speech processing clas
 
 ## Getting Started
 
+Create a local environment:
+
 ```bash
-pip install requirements.txt
+virtualenv env
+source env
+source env/bin/activate
+```
+
+Then install the dependencies:
+```bash
+pip install -r requirements.txt
+easy_install argparse
+```
+
+You can now run the script:
+```bash
 python main.py <training input file> <unlabeled input file> <labeled output file>
 ```

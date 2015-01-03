@@ -2,73 +2,23 @@ import numpy as np
 import math
 
 
-# Exponential approach to calculate N, gaussian dist. for xn
-def N(xn, mean, cov):
-    d = len(xn)
-    if d == len(mean) and (d, d) == cov.shape:
-        det = np.linalg.det(cov)
-        if det == 0:
-            raise NameError("The covariance matrix can't be singular")
+def logN(X, MU, SIGMA):
+    """
+    Evaluates natural log of the PDF for the multivariate Guassian distribution.
+    """
 
-        power = math.pow(det, 1.0/2)
-        norm_const = 1.0/(math.pow((2*math.pi), float(d)/2) * power)
-        xnMean = np.matrix(xn - mean)
-        inv = cov.I
-        expIn = -0.5 * (np.transpose(xnMean) * inv * xnMean)
-        result = math.pow(math.e, expIn)
-        return norm_const * result
-    else:
-        raise NameError("The dimensions of the input don't match")
+    mu = MU
+    x = X.T
+    sigma = np.atleast_2d(SIGMA)  # So we also can use it for 1-d distributions
 
+    N = len(MU)
+    ex1 = np.dot(np.linalg.inv(sigma), (x.T-mu).T)
+    ex = -0.5 * (x.T-mu).T * ex1
+    if ex.ndim == 2:
+        ex = np.sum(ex, axis=0)
+    K = -(N/2)*np.log(2*np.pi) - 0.5*np.log(np.linalg.det(SIGMA))
+    return ex + K
 
-# Log approach to calculate N, gaussian dist. for xn
-def logN(xn, mean, cov):
-    # First deduce the dimension from the length of u (mean)
-    d = len(mean)
-
-    if (d, d) == cov.shape:
-        det = np.linalg.det(cov)
-        # Calc of the det
-        det = np.linalg.det(cov)
-        # Check covariance matrix
-        if det == 0:
-            raise NameError("The covariance matrix can't be singular")
-        # Pre-calc of x - mean
-        diff = np.subtract(xn, mean)
-        # Prec-cal of the first part of the sum
-        part1 = d*np.log(2*math.pi)
-        # Pre-calc of last part of the sum
-        part3 = np.dot(np.transpose(diff), np.dot(np.linalg.inv(cov), diff))
-
-        main = part1+np.log(det)+part3
-
-        return -main/2
-    else:
-        raise NameError("The dimensions of the input don't match")
-
-
-# Ponder N with its weight for the GMM
-def wN(w, xn, mean, cov):
-    return w*math.exp(logN(xn, mean, cov))
-
-
-# Calculate the posterior probability of xn for the comp. m
-# *Glob var contains values for all components
-def postProb(m, wGlob, xn, meanGlob, covGlob):
-    # TODO: check all the Glob var has the same number of items
-    # if (len(cGlob) == len(meanGlob)) and (covGlob.shape == len(cGlob)
-
-    # Calc. the weighted N for the current component, top of the fraction
-    curM = wN(wGlob[m], xn, meanGlob[m], covGlob[m])
-
-    # Calc. the weighted N for all components, bottom of the fraction
-    allM = 0
-    j = 0
-    for w in wGlob:
-        allM += wN(w, xn, meanGlob[j], covGlob[j])
-        j += 1
-
-    return curM/allM
 
 # DEBUG
 # m = 0

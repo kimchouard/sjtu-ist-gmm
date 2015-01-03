@@ -1,18 +1,42 @@
 import numpy as np
-# import math
+import math
 import FileManager
 import GMMToolbox as GMM
 from Set import SetClass
 
 
 class EMalgo:
+    """ A set of function to apply a Expectation Maximization algo,
+    based on the Gaussian Mixture Models algorithm.
+
+    Attrs:
+    => for __init__
+    - source:
+    1. (str) string to the data file ---> then transformed into a SetClass
+    2. (SetClass) SetClass containing the xn values
+    - K:
+    (int) number of components to search for
+    - label:
+    (str) label of the model, to narrow to a specific label in the set if needed
+
+    => misc
+    - d
+    (int) Dim of the input (auto deduced)
+    - it
+    (int) the number of iterations done
+    - postProbs
+    (list) containing all the posterior probability for each iteration.
+    - ws
+    (npArray K) containing the weights for each iteration.
+    - means
+    (npArray K*d) containing the mean for each iteration.
+    - covs
+    (npArray K*d*d) containing the covs for each iteration.
+    """
+
     def __init__(self, source, k, label=0):
         """
         Initialize with values set and # of comp. to search for, and init Teta.
-        Params:
-            source: SetClass containing the xn values OR string to the data file
-            k: number of components to search for
-            label: narrow to a specific label in the set if needed
         """
 
         # Initiate the s data Set, either from file or direct parameter
@@ -24,114 +48,138 @@ class EMalgo:
             errorMsg = "The 1st param should be either a str or a SetClass"
             raise TypeError(errorMsg)
 
-        self.k = k
+        self.K = k
 
-        #Deduce the dimension from the input
+        # Deduce the dimension from the input
         self.d = self.s.getPoint(0).getDimNum()
 
-    # Run the EM algorithm for the value sets, with k components
-    def run(self):
-        # Initialize Teta values
-        self.initRun()
-        self.describe()
-        self.iterate()
-        self.describe()
-
-    def iterate(self):
-        # Create new params
-        # postProb = []
-        postProbSum = 0
-        postProbSums = []
-        newMean = []
-        newCov = []
-        newWs = []
-
-        for m in range(0, self.k):
-            # Calculate each postProb along with its sum
-            postProbM = []
-            postProbSumM = 0
-            for n in range(0, self.s.getLength()):
-                xn = self.getXn(n)
-                w = self.ws[self.it]
-                mean = self.means[self.it]
-                cov = self.covs[self.it]
-                postProbMN = GMM.postProb(m, w, xn, mean, cov)
-                postProbM.append(postProbMN)
-                postProbSumM += postProbMN
-            # postProb.append(postProbM)
-            postProbSum += postProbSumM
-            postProbSums.append(postProbSumM)
-
-            # Calculate new mean
-            newMeanM = 0
-            n = 0
-            for n in range(0, self.s.getLength()):
-                newMeanM += np.dot(postProbM[n], self.getXn(n))
-                n = n + 1
-            newMeanM = newMeanM / postProbSumM
-            newMean.append(newMeanM)
-
-            # Calculate new cov
-            newCovM = 0
-            n = 0
-            for n in range(0, self.s.getLength()):
-                diff = np.subtract(self.getXn(n), newMeanM)
-                rightDot = np.dot(diff, np.transpose(diff))
-                newCovM += np.dot(postProbM[n], rightDot)
-            newCov.append(newCovM)
-            n = n + 1
-
-        #Update weights
-        for m in range(0, self.k):
-            newWs.append(postProbSums[m]/postProbSum)
-
-        # Add new params to history lists
-        self.postProbs.append(postProbSums)
-        self.means.append(newMean)
-        self.covs.append(newCov)
-        self.ws.append(newWs)
-
-        # Increment the iteration count
-        self.it += 1
-
-    # Get the dim of a point at n
-    def getXn(self, n):
-        return self.s.getPoint(n).getDims()
+    def describe(self):
+        print "On iteration ", self.it
+        print "Data set: ", self.s.describe(False)
+        print "K and D:", self.K, ",", self.d
+        print "Teta(w, mean, cov): "
+        print self.ws[self.it]
+        print self.means[self.it]
+        print self.covs[self.it]
 
     def initRun(self):
         """
         Initialize Tetas history and iteration counters for the EM alg
         Where: ws = [w1,...], means = [mean1,...], covs = [cov1,...]
-        Comming from EM iterations
+        Coming from EM iterations
         """
         # Initialize iterations
         self.it = 0
-        self.postProbs = []
 
         # Init weights
-        w = np.ones(self.k) / self.k
-        self.ws = [w]
+        w = np.ones(self.K) / self.K
+        self.ws = [np.array(w)]
 
-        # Init mean (Harcoded for now)
-        # TODO: found those automatically -> k-means
-        mean = [[[-0.504032], [-0.0625]],
-                [[0.780242], [1.46875]],
-                [[1.5], [-0.015625]],
-                [[2.54435], [0.9375]]]
-        self.means = [mean]
+        # Init mean
+        self.means = [self.initMeans("hardcoded")]
+
 
         # Init covariance matrix with Identities
         cov = []
-        for i in range(0, self.k):
-            cov.append(np.identity(self.d))
-        self.covs = [cov]
+        for i in range(0, self.K):
+            cov.append(np.diag(np.ones(self.d)))
+        self.covs = [np.array(cov)]
 
-    def describe(self):
-        print "On iteration ", self.it
-        print "Data set: ", self.s.describe(False)
-        print "K and D:", self.k, ",", self.d
-        print "Post prob. matrix: ", self.postProbs
-        print "Teta(w, mean, cov): "
-        print self.ws[self.it]
-        print self.means[self.it]
-        print self.covs[self.it]
+    def initMeans(self, method):
+        """
+        Init the first means, following different methods.
+
+        :param method:
+        Define the method to use. Either:
+        - hardcoded,
+        - random (todo),
+        - kmeans.
+        :return: array with first mean
+        """
+        if method == "hardcoded":
+            mean = np.matrix([[-0.504032, -0.0625],
+                              [0.780242, 1.46875],
+                              [1.5, -0.015625],
+                              [2.54435, 0.9375]])
+        elif method == "random":
+            # TODO: random
+            mean = None
+        elif method == "kmeans":
+            # TODO: found those automatically -> k-means
+            mean = None
+
+        # DEBUG
+        # print "DEBUG"
+        # print mean
+        # meanA = [[[-0.504032], [-0.0625]],
+        #         [[0.780242], [1.46875]],
+        #         [[1.5], [-0.015625]],
+        #         [[2.54435], [0.9375]]]
+        # print meanA
+
+        return np.array(mean)
+
+    def getXn(self, n):
+        """
+        Get the dim of a point at n
+        :param n:
+        :return:
+        """
+        return self.s.getPoint(n).getDims()
+
+    def run(self, eps=1e-8, maxIt=1):
+        """ Run the EM algorithm for the value sets, with k components """
+        # Initialize Teta values
+        self.initRun()
+        self.describe()
+        # TODO do the iteration (for loop)
+        for i in range(maxIt):
+            # TODO check dat
+            self.EMrun()
+            self.describe()
+
+            # TODO break when diff under eps
+            # Increment the iteration count
+            self.it += 1
+
+    def EMrun(self):
+        # Get params for current iteration
+        data = self.s.getPoints() #TODO check the matrix aspect
+        w = self.ws[self.it]
+        mean = self.means[self.it]
+        cov = self.covs[self.it]
+
+        nbSamples, nbFeatures = data.shape
+        log_pXn_mat = np.zeros((nbSamples, self.K))
+        for i in range(self.K):
+            tmp = GMM.logN(data, mean[i], cov[i])
+            log_pXn_mat[:, i] = tmp + np.log(w[i])
+        pMax = np.max(log_pXn_mat, axis=1)
+        log_pXn = pMax + np.log(np.sum(np.exp(log_pXn_mat.T - pMax), axis=0).T)
+        logL = np.sum(log_pXn)
+
+        log_pNk = np.zeros((nbSamples, self.K))
+        for i in range(self.K):
+            log_pNk[:, i] = log_pXn_mat[:, i] - log_pXn
+
+        pNk = np.e**log_pNk
+
+        # Create new params
+        newMean = []
+        newCov = []
+        newWs = []
+
+        for i in range(self.K):
+            newMean[i] = np.sum(pNk[:, i] * data.T, axis=1) / np.sum(pNk[:, i])
+            newCov[i] = np.dot(pNk[:, i] * (data - mean[i]).T, data - mean[i]) / np.sum(pNk[:, i])
+            newWs[i] = np.sum(pNk[:, i]) / nbSamples
+
+        # Add new params to history lists
+        self.means.append(newMean)
+        self.covs.append(newCov)
+        self.ws.append(newWs)
+        # return (means, cov, weights, logL)
+
+    def wN(w, xn, mean, cov):
+        """ Ponder N with its weight for the GMM """
+        return w*math.exp(GMM.logN(xn, mean, cov))

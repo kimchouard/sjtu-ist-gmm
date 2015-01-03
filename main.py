@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-#import user class
+# import user class
 # from Point import PointClass
 # from Set import SetClass
 # import Plot

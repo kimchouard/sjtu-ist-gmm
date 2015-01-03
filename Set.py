@@ -1,8 +1,18 @@
+import numpy as np
+
 class SetClass:
     points = []
 
     def add(self, point):
         self.points.append(point)
+
+    def getPoints(self):
+        data = []
+
+        for p in self.points:
+            data.append(p.getDims())
+
+        return data
 
     def getPoint(self, n):
         return self.points[n]

@@ -1,3 +1,5 @@
+import numpy as np
+
 class PointClass:
     def __init__(self, dims, label=0):
         """
