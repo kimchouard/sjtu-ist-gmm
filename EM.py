@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import math
 import FileManager
 import GMMToolbox as GMM
@@ -16,12 +17,10 @@ class EMalgo:
     2. (SetClass) SetClass containing the xn values
     - K:
     (int) number of components to search for
-    - label:
-    (str) label of the model, to narrow to a specific label in the set if needed
+    - d:
+    (int) number of dimensions of the input
 
     => misc
-    - d
-    (int) Dim of the input (auto deduced)
     - it
     (int) the number of iterations done
     - postProbs
@@ -32,26 +31,28 @@ class EMalgo:
     (npArray K*d) containing the mean for each iteration.
     - covs
     (npArray K*d*d) containing the covs for each iteration.
+    - label:
+    (str) label of the model, to narrow to a specific label in the set if needed
     """
 
-    def __init__(self, source, k, label=0):
+    def __init__(self, source, k, dim, label):
         """
         Initialize with values set and # of comp. to search for, and init Teta.
         """
 
+        # Store misc var in self
+        self.K = k
+        self.label = label
+        self.d = dim
+
         # Initiate the s data Set, either from file or direct parameter
         if type(source) is str:
-            self.s = FileManager.importSet(source, label)
+            self.s = FileManager.importSet(source, self.d)
         elif type(source) is SetClass:
             self.s = source
         else:
             errorMsg = "The 1st param should be either a str or a SetClass"
             raise TypeError(errorMsg)
-
-        self.K = k
-
-        # Deduce the dimension from the input
-        self.d = self.s.getPoint(0).getDimNum()
 
     def describe(self):
         print "On iteration ", self.it
@@ -102,11 +103,11 @@ class EMalgo:
                               [1.5, -0.015625],
                               [2.54435, 0.9375]])
         elif method == "random":
-            # TODO: random
-            mean = None
+            # TODO: test random
+            mean = random.sample(self.s.getFeatures, self.K)
         elif method == "kmeans":
             # TODO: found those automatically -> k-means
-            mean = None
+            raise Exception("Method not implemented")
 
         # DEBUG
         # print "DEBUG"
@@ -135,16 +136,16 @@ class EMalgo:
         # TODO do the iteration (for loop)
         for i in range(maxIt):
             # TODO check dat
-            self.EMrun()
+            self.EMiterate()
             self.describe()
 
             # TODO break when diff under eps
             # Increment the iteration count
             self.it += 1
 
-    def EMrun(self):
+    def EMiterate(self):
         # Get params for current iteration
-        data = self.s.getPoints() #TODO check the matrix aspect
+        data = self.s.getFeatures(self.label) #TODO check the matrix aspect
         w = self.ws[self.it]
         mean = self.means[self.it]
         cov = self.covs[self.it]
@@ -165,9 +166,9 @@ class EMalgo:
         pNk = np.e**log_pNk
 
         # Create new params
-        newMean = []
-        newCov = []
-        newWs = []
+        newMean = np.zeros(4)
+        newCov = np.zeros(4)
+        newWs = np.zeros(4)
 
         for i in range(self.K):
             newMean[i] = np.sum(pNk[:, i] * data.T, axis=1) / np.sum(pNk[:, i])

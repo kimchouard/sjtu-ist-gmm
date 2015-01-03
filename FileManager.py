@@ -1,23 +1,21 @@
 #import user class
-from Point import PointClass
 from Set import SetClass
+import csv
 
-
-def importSet(path, label=0):
+def importSet(path, dimension):
     s = SetClass()
 
     with open(path, "r") as f:
-        data = f.readlines()
+        data = csv.reader(f, delimiter=' ', skipinitialspace=True)
 
         for line in data:
-            words = line.split()
-            if (len(words) > 2):
-                dataLabel = int(words[2])
+            if (len(line) > 2):
+                dataLabel = int(line[2])
             else:
                 dataLabel = 0
 
-            # Narrow to a specific label, if needed
-            if (label == 0) or (dataLabel == label):
-                dims = [[float(words[0])], [float(words[1])]]
-                s.add(PointClass(dims, dataLabel))
+            dims = [float(i) for i in line[:dimension]]
+            s.add(dims, dataLabel)
+
+    s.format()
     return s
