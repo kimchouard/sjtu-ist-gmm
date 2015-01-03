@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 class SetClass:
     points = []
@@ -69,7 +69,7 @@ class SetClass:
 
         return [X, Y, pointSize, C]
 
-    def plot(self):
-        data = self.getPlotData()
-        plt.scatter(data[0], data[1], data[2], data[3])
-        plt.show()
+    # def plot(self):
+    #     data = self.getPlotData()
+    #     plt.scatter(data[0], data[1], data[2], data[3])
+    #     plt.show()

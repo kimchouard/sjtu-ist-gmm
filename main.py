@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 
-from EM import EMmanager
-import FileManager
+from libs.EM import EMmanager
+import libs.FileManager as FM
 
 
 def main():
-    s = FileManager.importSet("data/train.txt", 2)
-    s.plot()
+    s = FM.importSet("data/train.txt", 2)
+    # s.plot()
 
     model = EMmanager(s, 4, 2)
     model.train()
