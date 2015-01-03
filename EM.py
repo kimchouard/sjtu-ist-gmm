@@ -117,9 +117,7 @@ class EMmanager:
         logL = 0
 
         self.describe()
-        # TODO do the iteration (for loop) on multiples labels
         for i in range(self.maxIt):
-            # TODO check dat
             newLogL = self.EMiterate()
 
             if np.abs(logL - newLogL) < self.eps:
@@ -135,7 +133,7 @@ class EMmanager:
         :return: logL
         """
         # Get params for current iteration
-        data = self.s.getFeatures(self.label) #TODO check the matrix aspect
+        data = self.s.getFeatures(self.label)
 
         nbSamples, nbFeatures = data.shape
         log_pXn_mat = np.zeros((nbSamples, self.K))

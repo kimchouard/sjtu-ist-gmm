@@ -16,6 +16,6 @@ def importSet(path, dimension):
 
             dims = [float(i) for i in line[:dimension]]
             s.add(dims, dataLabel)
-
+    # Finalize the set with an array form
     s.format()
     return s

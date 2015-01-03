@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class SetClass:
     points = []
@@ -38,29 +39,37 @@ class SetClass:
 
     def describe(self, full):
         for label in self.dataDic:
-            print "Containing %d points." % len(self.dataDic[label])
+            print "Containing %d points on label %s." % (len(self.dataDic[label]), label)
             if full:
                 for point in self.dataDic[label]:
                     print "1,"+str(point)
 
-    # TODO bugfix this function
-    # def getPlotData(self):
-    #     X = []
-    #     Y = []
-    #     pointSize = 5
-    #     C = []
-    #
-    #     for label in self.dataDic:
-    #         for point in self.points:
-    #             X.append(point.getDim(0))
-    #             Y.append(point.getDim(1))
-    #
-    #     if self.label == 1:
-    #         return [1, 0, 0]
-    #     elif self.label == 2:
-    #         return [0, 1, 0]
-    #     else:
-    #         return [0, 0, 1]
-    #             C.append(point.getColor())
-    #
-    #     return [X, Y, pointSize, C]
+    def getPlotData(self):
+        """
+        Get plot data for matplotlib
+        (only support 2 dims for now)
+        :return: [X, Y, pointSize, Colors]
+        """
+        X = []
+        Y = []
+        pointSize = 5
+        C = []
+
+        for label in self.dataDic:
+            for point in self.dataDic[label]:
+                X.append(point[0])
+                Y.append(point[1])
+
+            if label == 1:
+                C.append([1, 0, 0])
+            elif label == 2:
+                C.append([0, 1, 0])
+            else:
+                C.append([0, 0, 1])
+
+        return [X, Y, pointSize, C]
+
+    def plot(self):
+        data = self.getPlotData()
+        plt.scatter(data[0], data[1], data[2], data[3])
+        plt.show()
