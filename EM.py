@@ -1,20 +1,18 @@
 import numpy as np
 import random
 import math
-import FileManager
 import GMMToolbox as GMM
 from Set import SetClass
 
 
-class EMalgo:
+class EMmanager:
     """ A set of function to apply a Expectation Maximization algo,
     based on the Gaussian Mixture Models algorithm.
 
     Attrs:
     => for __init__
     - source:
-    1. (str) string to the data file ---> then transformed into a SetClass
-    2. (SetClass) SetClass containing the xn values
+    (SetClass) SetClass containing the xn values
     - K:
     (int) number of components to search for
     - d:
@@ -23,19 +21,17 @@ class EMalgo:
     => misc
     - it
     (int) the number of iterations done
-    - postProbs
-    (list) containing all the posterior probability for each iteration.
     - w
     (npArray K) containing the weights.
     - mean
     (npArray K*d) containing the means.
-    - covs
+    - cov
     (npArray K*d*d) containing the covs.
     - label:
     (str) label of the model, to narrow to a specific label in the set if needed
     """
 
-    def __init__(self, source, k, dim, label):
+    def __init__(self, source, k, label, eps=1e-8, maxIt=20):
         """
         Initialize with values set and # of comp. to search for, and init Teta.
         """
@@ -43,16 +39,10 @@ class EMalgo:
         # Store misc var in self
         self.K = k
         self.label = label
-        self.d = dim
-
-        # Initiate the s data Set, either from file or direct parameter
-        if type(source) is str:
-            self.s = FileManager.importSet(source, self.d)
-        elif type(source) is SetClass:
-            self.s = source
-        else:
-            errorMsg = "The 1st param should be either a str or a SetClass"
-            raise TypeError(errorMsg)
+        self.d = source.getFeatures(label).shape[1]
+        self.eps = eps
+        self.maxIt = maxIt
+        self.s = source
 
     def describe(self):
         print "On iteration ", self.it
@@ -118,31 +108,32 @@ class EMalgo:
 
         return np.array(mean)
 
-    def getXn(self, n):
-        """
-        Get the dim of a point at n
-        :param n:
-        :return:
-        """
-        return self.s.getPoint(n).getDims()
-
-    def run(self, eps=1e-8, maxIt=1):
+    def train(self):
         """ Run the EM algorithm for the value sets, with k components """
         # Initialize Teta values
         self.initRun()
+
+        # Init eps calculation
+        logL = 0
+
         self.describe()
-        # TODO do the iteration (for loop)
-        for i in range(maxIt):
+        # TODO do the iteration (for loop) on multiples labels
+        for i in range(self.maxIt):
             # TODO check dat
-            self.EMiterate()
-            # TODO break when diff under eps
+            newLogL = self.EMiterate()
 
-            # Increment the iteration count
-            self.it += 1
-
-            self.describe()
+            if np.abs(logL - newLogL) < self.eps:
+                break
+            else:
+                logL = newLogL
+                self.it += 1
+        self.describe()
 
     def EMiterate(self):
+        """
+        Do one iteration
+        :return: logL
+        """
         # Get params for current iteration
         data = self.s.getFeatures(self.label) #TODO check the matrix aspect
 
@@ -165,6 +156,8 @@ class EMalgo:
             self.mean[i] = np.sum(pNk[:, i] * data.T, axis=1) / np.sum(pNk[:, i])
             self.cov[i] = np.dot(pNk[:, i] * (data - self.mean[i]).T, data - self.mean[i]) / np.sum(pNk[:, i])
             self.w[i] = np.sum(pNk[:, i]) / nbSamples
+
+        return logL
 
     def wN(w, xn, mean, cov):
         """ Ponder N with its weight for the GMM """

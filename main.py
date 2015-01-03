@@ -4,14 +4,15 @@
 # from Point import PointClass
 # from Set import SetClass
 # import Plot
-from EM import EMalgo
+from EM import EMmanager
+import FileManager
 
 
 def main():
-    # s.describe(False)
-    # Plot.plotSet(s)
-    em = EMalgo("data/train.txt", 4, 2, 2)
-    em.run()
+    s = FileManager.importSet("data/train.txt", 2)
+
+    model = EMmanager(s, 4, 2)
+    model.train()
 
 if __name__ == '__main__':
     main()
