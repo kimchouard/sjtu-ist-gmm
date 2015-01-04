@@ -19,7 +19,7 @@ class SetClass:
         :param label:
         :return:
         """
-        if(label in self.dataDic.keys()):
+        if label in self.dataDic.keys():
             self.dataDic[label].append(dims)
         else:
             self.dataDic[label] = [dims]
@@ -27,6 +27,9 @@ class SetClass:
     def format(self):
         for label in self.dataDic:
             self.dataDic[label] = np.array(self.dataDic[label])
+
+    def getDataDic(self):
+        return self.dataDic
 
     def getFeatures(self, label):
         return self.dataDic[label]

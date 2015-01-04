@@ -53,7 +53,7 @@ class EMmanager:
         print self.mean
         print self.cov
 
-    def initRun(self):
+    def initRun(self, method):
         """
         Initialize Tetas history and iteration counters for the EM alg
         Where: ws = [w1,...], means = [mean1,...], covs = [cov1,...]
@@ -66,7 +66,7 @@ class EMmanager:
         self.w = np.ones(self.K) / self.K
 
         # Init mean
-        self.mean = self.initMean("hardcoded")
+        self.mean = self.initMean(method)
 
 
         # Init covariance matrix with Identities
@@ -81,8 +81,8 @@ class EMmanager:
         :param method:
         Define the method to use. Either:
         - hardcoded,
-        - random (todo),
-        - kmeans.
+        - random,
+        - kmeans (todo).
         :return: array with first mean
         """
         if method == "hardcoded":
@@ -108,10 +108,10 @@ class EMmanager:
 
         return np.array(mean)
 
-    def train(self):
+    def train(self, method = "random"):
         """ Run the EM algorithm for the value sets, with k components """
         # Initialize Teta values
-        self.initRun()
+        self.initRun(method)
 
         # Init eps calculation
         logL = 0
