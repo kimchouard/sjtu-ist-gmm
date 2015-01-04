@@ -157,6 +157,22 @@ class EMmanager:
 
         return logL
 
-    def wN(w, xn, mean, cov):
-        """ Ponder N with its weight for the GMM """
-        return w*math.exp(GMM.logN(xn, mean, cov))
+    def pdf(self, X):
+        """
+        Evaluate the pdf of data to belong to the mixture
+        :param data: (npArray) data to evaluate
+        :return: proba (npArray)
+        """
+
+        proba = None
+        for i in range(self.K):
+            w = self.w[i]
+            probaToAdd = GMM.gaussianPdf(X, self.mean[i], self.cov[i]) * w
+            if proba is None:
+                proba = probaToAdd
+            else:
+                proba += probaToAdd
+        return proba
+
+    def getLabel(self):
+        return self.label

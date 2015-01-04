@@ -47,22 +47,42 @@ def main():
 
     args = command.parse_args()
 
+    if args.verbose:
+        print '====== Start reading training file ========='
+
     if not path.isfile(args.training) or not path.isfile(args.file):
         command.error('Invalid file path')
 
     # Create the Set from the training inputFile
     sTrain = FM.importSet(args.training, args.dimension)
 
+    if args.verbose:
+        print '======= Reading training file done ========='
+        print '============= Start training ==============='
+
     # Init the model array
     models = []
 
-    for label in sTrain.getDataDic():
+    for label in sTrain.getLabels():
         model = EMmanager(sTrain, 4, label)
         model.train(args.initMethod)
         models.append(model)
 
     if args.verbose:
         print '============= Training done ================'
+        print '========= Start label affectation =========='
+
+    s2label = FM.importSet(args.file, args.dimension)
+    s2label.affectLabel(models)
+
+    if args.verbose:
+        print '========= Label affectation done ==========='
+        print '========== Start writing output ============'
+
+    FM.exportSet(args.output, s2label)
+
+    if args.verbose:
+        print '========== Writing output done ============='
 
 if __name__ == '__main__':
     main()

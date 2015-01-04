@@ -7,7 +7,7 @@ class SetClass:
     def __init__(self):
         """Initialize dict containing data
 
-        WARNING: Need to format after adding all the points"""
+        WARNING: Need to format after adding all the points!"""
         self.dataDic = dict()
 
     def add(self, dims, label):
@@ -16,7 +16,7 @@ class SetClass:
 
         WARNING: Need to format after adding all the points
         :param dims:
-        :param label:
+        :param label: Label from 1 to N. (N.B.: -1 if no label!!)
         :return:
         """
         if label in self.dataDic.keys():
@@ -30,6 +30,9 @@ class SetClass:
 
     def getDataDic(self):
         return self.dataDic
+
+    def getLabels(self):
+        return self.dataDic.keys()
 
     def getFeatures(self, label):
         return self.dataDic[label]
@@ -46,6 +49,25 @@ class SetClass:
             if full:
                 for point in self.dataDic[label]:
                     print "1,"+str(point)
+
+    def affectLabel(self, models):
+        """
+        Affect a label to the data based on the models given in parameters.
+        :param models:
+        :return:
+        """
+        # The not labelled data is contained under the label -1
+        data = self.dataDic["-1"]
+
+        p_Xn = np.zeros((len(data), len(models)))
+        for i, model in enumerate(models):
+            p_Xn[:, i] = model.pdf(data)
+        labels = np.argmax(p_Xn, axis=1)
+
+        for i, feature in enumerate(data):
+            self.add(feature, models[labels[i]].getLabel())
+
+        del self.dataDic["-1"]
 
     def getPlotData(self):
         """
