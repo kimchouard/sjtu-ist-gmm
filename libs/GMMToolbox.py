@@ -19,16 +19,12 @@ def logN(X, MEAN, COV):
     return ex + K
 
 def gaussianPdf(X, MEAN, COV):
-    """Evaluate the pdf of data to belong for the ith component of the mixture
-
-    # Params:
-    data (npArray)
-    i (Integer):
-        Represent the ith component of the mixture
-
-    # Return:
-    proba (npArray):
-        Proba for each data
+    """
+    Evaluate the pdf of data to belong for the ith component of the mixture
+    :param X:
+    :param MEAN:
+    :param COV:
+    :return: (npArray) Proba for each data
     """
     d = len(MEAN)
     mean = MEAN
