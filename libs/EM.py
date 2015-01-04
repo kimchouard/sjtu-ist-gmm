@@ -31,13 +31,14 @@ class EMmanager:
     (str) label of the model, to narrow to a specific label in the set if needed
     """
 
-    def __init__(self, source, k, label, eps=1e-8, maxIt=20):
+    def __init__(self, source, k, label, verbose=False, eps=1e-8, maxIt=20):
         """
         Initialize with values set and # of comp. to search for, and init Teta.
         """
 
         # Store misc var in self
         self.K = k
+        self.verbose = verbose
         self.label = label
         self.d = source.getFeatures(label).shape[1]
         self.eps = eps
@@ -45,13 +46,14 @@ class EMmanager:
         self.s = source
 
     def describe(self):
-        print "On iteration ", self.it
-        print "Data set: ", self.s.describe(False)
-        print "K and D:", self.K, ",", self.d
-        print "Teta(w, mean, cov): "
-        print self.w
-        print self.mean
-        print self.cov
+        if self.verbose:
+            print "On iteration ", self.it
+            print "Data set: ", self.s.describe(False)
+            print "K and D:", self.K, ",", self.d
+            print "Teta(w, mean, cov): "
+            print self.w
+            print self.mean
+            print self.cov
 
     def initRun(self, method):
         """
@@ -80,19 +82,12 @@ class EMmanager:
 
         :param method:
         Define the method to use. Either:
-        - hardcoded,
         - random,
         - kmeans (todo).
         :return: array with first mean
         """
-        if method == "hardcoded":
-            mean = np.matrix([[-0.504032, -0.0625],
-                              [0.780242, 1.46875],
-                              [1.5, -0.015625],
-                              [2.54435, 0.9375]])
-        elif method == "random":
-            # TODO: test random
-            mean = random.sample(self.s.getFeatures, self.K)
+        if method == "random":
+            mean = random.sample(self.s.getFeatures(self.label), self.K)
         elif method == "kmeans":
             # TODO: found those automatically -> k-means
             raise Exception("Method not implemented")

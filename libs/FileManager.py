@@ -2,14 +2,14 @@
 from Set import SetClass
 import csv
 
-def importSet(path, dimension):
+def importSet(path, dimension, fakeUnlabeled=False):
     s = SetClass()
 
     with open(path, "r") as f:
         data = csv.reader(f, delimiter=' ', skipinitialspace=True)
 
         for line in data:
-            if (len(line) > 2):
+            if (len(line) > 2) and (not fakeUnlabeled):
                 dataLabel = line[2]
             else:
                 dataLabel = "-1"

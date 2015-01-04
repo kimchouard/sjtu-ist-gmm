@@ -8,7 +8,6 @@ Create a local environment:
 
 ```bash
 virtualenv env
-source env
 source env/bin/activate
 ```
 

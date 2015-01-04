@@ -44,6 +44,13 @@ def main():
         help='Get it more talkative :)',
         action='store_true'
     )
+    command.add_argument(
+        '-t',
+        '--tests',
+        help='When testing the algorithm. Don\'t import the labels from the unlabeled'
+             ' input file, even if labeled.',
+        action='store_true'
+    )
 
     args = command.parse_args()
 
@@ -64,7 +71,7 @@ def main():
     models = []
 
     for label in sTrain.getLabels():
-        model = EMmanager(sTrain, 4, label)
+        model = EMmanager(sTrain, 4, label, args.verbose)
         model.train(args.initMethod)
         models.append(model)
 
@@ -72,7 +79,7 @@ def main():
         print '============= Training done ================'
         print '========= Start label affectation =========='
 
-    s2label = FM.importSet(args.file, args.dimension)
+    s2label = FM.importSet(args.file, args.dimension, args.tests)
     s2label.affectLabel(models)
 
     if args.verbose:
