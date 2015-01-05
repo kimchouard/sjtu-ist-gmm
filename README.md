@@ -28,6 +28,18 @@ To run the main script:
 python main.py <training input file> <unlabeled input file> <labeled output file>
 ```
 
+Optional arguments:
+
+```
+-h, --help            show a help message and exit
+-d DIMENSION, --dimension DIMENSION
+                      Number of dimensions for features
+-m INITMETHOD, --initMethod INITMETHOD
+                      Means selection method: `random` `kmeans` (not yet implemented).
+-v, --verbose         Get it more talkative :)
+-t, --tests           Used to test the algorithm. Don't import the labels from the unlabeled input file, even if labeled.
+```
+
 ### Test script
 
 To run a batch of test, on the dev.txt for examples:

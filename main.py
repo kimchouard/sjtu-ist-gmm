@@ -34,9 +34,9 @@ def main():
     command.add_argument(
         '-m',
         '--initMethod',
-        help='Means selection method: `random` `kmeans` or `hardcoded`.',
+        help='Means selection method: `random` `kmeans` (not yet implemented).',
         required=False,
-        default="hardcoded"
+        default="random"
     )
     command.add_argument(
         '-v',
@@ -47,7 +47,7 @@ def main():
     command.add_argument(
         '-t',
         '--tests',
-        help='When testing the algorithm. Don\'t import the labels from the unlabeled'
+        help='Used to test the algorithm. Don\'t import the labels from the unlabeled'
              ' input file, even if labeled.',
         action='store_true'
     )
